@@ -1,0 +1,22 @@
+name: "Marine Surveillance Pipeline"
+description: "SegFormer-based semantic segmentation for coral reef monitoring."
+version: "1.0.0"
+slug: "marine_surveillance_pipeline"
+init: false
+arch:
+  - amd64
+  - aarch64
+# This allows the container to talk to the HA MQTT broker automatically
+services:
+  - mqtt:need
+# Defines the UI configuration options for the user
+schema:
+  input_video_path: str
+  inference_temperature: float
+# Map the user's Proxmox/Host media directory into the container
+map:
+  - media:rw
+  - share:rw
+options:
+  input_video_path: "/media/tank_video.mp4"
+  inference_temperature: 1.2

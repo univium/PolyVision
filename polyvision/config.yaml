@@ -1,0 +1,17 @@
+name: "PolyVision"
+description: "AI-Powered Marine Life Detection for Home Assistant"
+version: "1.0.0"
+slug: "polyvision"
+init: false
+arch:
+  - amd64
+  - aarch64
+options:
+  input_video_path: "rtsp://your_camera_ip/stream"
+  inference_temperature: 1.5
+schema:
+  input_video_path: str
+  inference_temperature: float
+mqtt: true
+host_network: false
+startup: application
