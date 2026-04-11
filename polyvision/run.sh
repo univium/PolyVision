@@ -10,6 +10,7 @@ export INPUT_VIDEO=$(jq --raw-output '.input_video_path' /data/options.json)
 export INFERENCE_TEMP=$(jq --raw-output '.inference_temperature' /data/options.json)
 
 # MQTT logic
+if [ -z "$MQTT_HOST" ]; then
     echo "Notice: MQTT_HOST not found in environment. Using default fallback: core-mosquitto"
     export MQTT_HOST="core-mosquitto"
 else
