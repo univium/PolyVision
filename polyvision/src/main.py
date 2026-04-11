@@ -28,7 +28,7 @@ async def main():
     # 2. Extract configuration from environment
     base_path = os.path.dirname(os.path.abspath(__file__))
     stock_video = os.path.join(base_path, "assets", "stock_video.mp4")
-    ha_fallback_video = "/config/polyvision/fallback.mp4"
+    ha_fallback_video = "/root/config/polyvision/fallback.mp4"
     
     input_video_env = os.getenv("INPUT_VIDEO", "").strip()
     
