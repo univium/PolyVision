@@ -8,6 +8,15 @@ from agents.iot_bridge import IOTBridge
 from agents.visual_formatter import VisualFormatter
 
 async def main():
+    print("--- PolyVision Environment Diagnostics ---")
+    try:
+        import numpy as np
+        import cv2
+        print(f"[Diag] NumPy Version: {np.__version__}")
+        print(f"[Diag] OpenCV Version: {cv2.__version__}")
+    except Exception as e:
+        print(f"[Diag] CRITICAL: Dependency import failed: {e}")
+        
     print("--- PolyVision Orchestrator Booting ---")
     
     # 1. Setup Inter-Agent Communication (Asyncio Queues)

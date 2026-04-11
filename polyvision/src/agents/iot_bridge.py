@@ -88,6 +88,7 @@ class IOTBridge:
     async def run(self):
         print("[IOTBridge] Starting...")
         await asyncio.to_thread(self._connect)
+        await asyncio.sleep(1) # Allow connection to settle before starting loop
         
         while True:
             # Process Formatted UI images
