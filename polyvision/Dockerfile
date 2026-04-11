@@ -17,7 +17,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # Install pip requirements. CPU-only torch to keep image smaller for general usage.
 RUN pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
-RUN pip3 install --no-cache-dir transformers opencv-python paho-mqtt matplotlib numpy pydantic
+RUN pip3 install --no-cache-dir transformers opencv-python paho-mqtt matplotlib "numpy<2" pydantic
 
 # Copy the execution script and source code
 COPY run.sh /app/

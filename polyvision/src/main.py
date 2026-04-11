@@ -17,14 +17,24 @@ async def main():
     ui_to_iot_queue = asyncio.Queue(maxsize=5) 
     
     # 2. Extract configuration from environment
-    # Fallback helps with local testing outside of Docker if needed
     base_path = os.path.dirname(os.path.abspath(__file__))
-    default_video = os.path.join(base_path, "assets", "stock_video.mp4")
+    stock_video = os.path.join(base_path, "assets", "stock_video.mp4")
+    ha_fallback_video = "/config/polyvision/fallback.mp4"
     
-    input_video = os.getenv("INPUT_VIDEO", default_video)
+    input_video_env = os.getenv("INPUT_VIDEO", "").strip()
+    
+    # Path resolution logic
+    if input_video_env and input_video_env != "null":
+        input_video = input_video_env
+        print(f"[Orchestrator] Using Primary Input Video (RTSP/URL): {input_video}")
+    elif os.path.exists(ha_fallback_video):
+        input_video = ha_fallback_video
+        print(f"[Orchestrator] Using HA Local Fallback Video: {input_video}")
+    else:
+        input_video = stock_video
+        print(f"[Orchestrator] Using Stock Default Video: {input_video}")
+        
     inference_temp = float(os.getenv("INFERENCE_TEMP", "1.5"))
-    
-    print(f"[Orchestrator] Input Source: {input_video}")
     
     # 3. Initialize Agents
     vision_agent = VisionAgent(

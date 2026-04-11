@@ -50,16 +50,27 @@ class VisionAgent:
         print(f"[VisionAgent] Model Loaded. Classes: {self.num_classes}")
         
         cap = cv2.VideoCapture(self.video_path)
-        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
         
         frame_counter = 0
         
-        while cap.isOpened():
-            # If reading from a file, simulate wait time, if RTSP it blocks naturally
+        while True:
+            if not cap.isOpened():
+                print(f"[VisionAgent] Stream not open. Attempting connection to: {self.video_path}")
+                await asyncio.sleep(5)
+                cap = cv2.VideoCapture(self.video_path)
+                continue
+                
             success, bgr = cap.read()
             if not success:
-                print("[VisionAgent] Video stream ended or failed.")
-                break
+                print("[VisionAgent] Stream ended or connection lost. Reconnecting/Looping...")
+                if str(self.video_path).startswith("rtsp://") or str(self.video_path).startswith("http"):
+                    cap.release()
+                    await asyncio.sleep(2)
+                    continue
+                else: 
+                    # Local file: just reset frame position
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    continue
                 
             ts = time.time()
             

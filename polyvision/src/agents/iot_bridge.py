@@ -59,13 +59,31 @@ class IOTBridge:
         }
         self.client.publish(f"{self.topic_prefix}/sensor/polyvision_classes/config", json.dumps(sensor_config), retain=True)
 
+        print("\n" + "="*60)
+        print("🎉 MQTT Discovery Payloads Sent!")
+        print("To view your PolyVision dashboard, add a 'Manual' card to your HA dashboard")
+        print("and paste the following YAML snippet:\n")
+        print("type: vertical-stack")
+        print("cards:")
+        print("  - type: picture-entity")
+        print("    entity: camera.polyvision_segmentation_cam")
+        print("    show_name: false")
+        print("    show_state: false")
+        print("  - type: entities")
+        print("    entities:")
+        print("      - entity: sensor.polyvision_active_classes")
+        print("        name: Active Tracking Classes")
+        print("="*60 + "\n")
+
     def _connect(self):
         try:
              self.client.on_connect = self._on_connect
              self.client.connect(self.mqtt_host, self.mqtt_port, 60)
              self.client.loop_start()
         except Exception as e:
-             print(f"[IOTBridge] Could not connect to MQTT: {e}")
+             print(f"[IOTBridge] Could not connect to MQTT Broker at {self.mqtt_host}:{self.mqtt_port}.")
+             print(f"[IOTBridge] Reason: {e}")
+             print("[IOTBridge] Running in Standalone Mode (No Home Assistant Integration).")
 
     async def run(self):
         print("[IOTBridge] Starting...")
