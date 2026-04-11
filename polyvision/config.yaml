@@ -1,6 +1,6 @@
 name: "PolyVision"
 description: "AI-Powered Marine Life Detection for Home Assistant"
-version: "1.0.3"
+version: "1.0.4"
 slug: "polyvision"
 init: false
 arch:
