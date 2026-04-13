@@ -10,8 +10,8 @@ from transformers import SegformerImageProcessor, SegformerForSemanticSegmentati
 from models import FramePayload
 
 class VisionAgent:
-    def __init__(self, video_path: str, inference_temp: float, out_ui_queue: asyncio.Queue, out_iot_queue: asyncio.Queue):
-        self.video_path = video_path
+    def __init__(self, video_sources: list, inference_temp: float, out_ui_queue: asyncio.Queue, out_iot_queue: asyncio.Queue):
+        self.video_sources = video_sources
         self.inference_temp = inference_temp
         self.out_ui_queue = out_ui_queue
         self.out_iot_queue = out_iot_queue
@@ -49,28 +49,42 @@ class VisionAgent:
         await asyncio.to_thread(self._load_model)
         print(f"[VisionAgent] Model Loaded. Classes: {self.num_classes}")
         
-        cap = cv2.VideoCapture(self.video_path)
-        
+        source_index = 0
+        cap = None
         frame_counter = 0
         
         while True:
-            if not cap.isOpened():
-                print(f"[VisionAgent] Stream not open. Attempting connection to: {self.video_path}")
-                await asyncio.sleep(5)
-                cap = cv2.VideoCapture(self.video_path)
+            if not self.video_sources:
+                print("[VisionAgent] CRITICAL: No video sources available. Waiting 10s...")
+                await asyncio.sleep(10)
                 continue
+
+            current_path = self.video_sources[source_index]
+            
+            # Connection logic
+            if cap is None or not cap.isOpened():
+                print(f"[VisionAgent] Attempting connection to source [{source_index}]: {current_path}")
+                cap = cv2.VideoCapture(current_path)
                 
+                if not cap.isOpened():
+                    print(f"[VisionAgent] connection failed. Rotating source...")
+                    source_index = (source_index + 1) % len(self.video_sources)
+                    cap = None
+                    await asyncio.sleep(5)
+                    continue
+                else:
+                    print(f"[VisionAgent] Successfully opened: {current_path}")
+
             success, bgr = cap.read()
+            
             if not success:
-                print("[VisionAgent] Stream ended or connection lost. Reconnecting/Looping...")
-                if str(self.video_path).startswith("rtsp://") or str(self.video_path).startswith("http"):
-                    cap.release()
-                    await asyncio.sleep(2)
-                    continue
-                else: 
-                    # Local file: just reset frame position
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    continue
+                print(f"[VisionAgent] Stream ended or connection lost: {current_path}")
+                cap.release()
+                cap = None
+                # Rotate to next source (effectively retries primary after secondary ends/fails)
+                source_index = (source_index + 1) % len(self.video_sources)
+                await asyncio.sleep(2)
+                continue
                 
             ts = time.time()
             

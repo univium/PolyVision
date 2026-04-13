@@ -26,28 +26,28 @@ async def main():
     ui_to_iot_queue = asyncio.Queue(maxsize=5) 
     
     # 2. Extract configuration from environment
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    stock_video = os.path.join(base_path, "assets", "stock_video.mp4")
     ha_fallback_video = "/root/config/polyvision/fallback.mp4"
-    
     input_video_env = os.getenv("INPUT_VIDEO", "").strip()
     
-    # Path resolution logic
+    # Path resolution logic (refactored to build priority list)
+    video_sources = []
+    
     if input_video_env and input_video_env != "null":
-        input_video = input_video_env
-        print(f"[Orchestrator] Using Primary Input Video (RTSP/URL): {input_video}")
-    elif os.path.exists(ha_fallback_video):
-        input_video = ha_fallback_video
-        print(f"[Orchestrator] Using HA Local Fallback Video: {input_video}")
-    else:
-        input_video = stock_video
-        print(f"[Orchestrator] Using Stock Default Video: {input_video}")
+        video_sources.append(input_video_env)
+        print(f"[Orchestrator] Primary Source (RSTP) Configured: {input_video_env}")
+        
+    if os.path.exists(ha_fallback_video):
+        video_sources.append(ha_fallback_video)
+        print(f"[Orchestrator] HA Local Fallback Detected: {ha_fallback_video}")
+
+    if not video_sources:
+        print("[Orchestrator] WARNING: No video sources configured or detected (Env/Fallback).")
         
     inference_temp = float(os.getenv("INFERENCE_TEMP", "1.5"))
     
     # 3. Initialize Agents
     vision_agent = VisionAgent(
-        video_path=input_video, 
+        video_sources=video_sources, 
         inference_temp=inference_temp,
         out_ui_queue=vision_to_ui_queue, 
         out_iot_queue=vision_to_iot_queue
