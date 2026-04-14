@@ -14,4 +14,7 @@ schema:
   inference_temperature: float
 mqtt: true
 host_network: false
+map:
+  - homeassistant_config:ro
 startup: application
+

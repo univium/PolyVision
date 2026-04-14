@@ -26,7 +26,7 @@ async def main():
     ui_to_iot_queue = asyncio.Queue(maxsize=5) 
     
     # 2. Extract configuration from environment
-    ha_fallback_video = "/config/polyvision/fallback.mp4"
+    ha_fallback_video = "/homeassistant/polyvision/fallback.mp4"
     input_video_env = os.getenv("INPUT_VIDEO", "").strip()
     
     # Path resolution logic (refactored to build priority list)
